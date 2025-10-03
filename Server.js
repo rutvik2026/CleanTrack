@@ -17,7 +17,10 @@ dotenv.config();
 })();
 
 const app = express();
-app.use(cors());
+app.use(cors({
+    origin: "https://clean-track-frontend.vercel.app/", 
+    credentials: true, 
+}));
 app.use(bodyParser.json());
 app.post("/api/register",registerController);
 app.post("/api/login",loginController);
