@@ -47,7 +47,9 @@ const loginController = async (req, res) => {
         const user = await CleanerModel.findOne({ email: req.body.email });
         const admin = await AdminModel.findOne({ email: req.body.email });
 
-
+        if (!user && !admin) {
+            return res.status(200).send({ sucess: false, message: "User not found" });
+        }
 
         if (user) {
             const isMatch = await bcrypt.compare(req.body.password, user.password);
@@ -60,7 +62,8 @@ const loginController = async (req, res) => {
                 res.status(200).send({
                     sucess: true, message: "Login sucessful", token, cust: {
                         id: user.id,
-                        role: "user",
+                        role: "cleaner",
+                        email: user.email,
                     }
                 })
             }
@@ -77,6 +80,7 @@ const loginController = async (req, res) => {
                     sucess: true, message: "Login sucessful", token, cust: {
                         id: admin.id,
                         role: "admin",
+                        email: admin.email,
                     }
                 })
             }
@@ -98,15 +102,24 @@ const newToilet = async (req, res) => {
             const newToilet = new ToiletModel(req.body);
             newToilet.status = "new Toilet";
             await newToilet.save();
-            await AdminModel.updateOne(
+            const updatedAdmin = await AdminModel.findOneAndUpdate(
                 { email: adminEmail },
-                { $push: { toilets: newToilet._id } }
+                { $push: { toilets: newToilet._id } },
+                { new: true }
             );
 
-            await CleanerModel.updateOne(
+            const updatedCleaner = await CleanerModel.findOneAndUpdate(
                 { email: cleanerEmail },
-                { $push: { toilets: newToilet._id } }
+                { $push: { toilets: newToilet._id } },
+                { new: true }
             );
+
+            if (!updatedAdmin) {
+                console.warn("⚠️ No admin found with email:", adminEmail);
+            }
+            if (!updatedCleaner) {
+                console.warn("⚠️ No cleaner found with email:", cleanerEmail);
+            }
             res.status(200).send({ sucess: true, message: "new toilet added" })
 
         }
