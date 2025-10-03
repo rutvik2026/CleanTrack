@@ -28,4 +28,5 @@ app.post("/api/newtoilet",newToilet);
 app.post("/api/toilet",toiletStatus );
 app.get("/api/getData",getData);
 app.get("/api/get",get);
-app.listen(3000, () => console.log("Server running on port 3000 y"));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
