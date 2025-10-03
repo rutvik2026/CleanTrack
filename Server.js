@@ -18,14 +18,7 @@ dotenv.config();
 
 const app = express();
 app.use(cors({
-    origin: "https://clean-track-frontend.vercel.app/", 
-    
-  methods: ["GET",
-    "POST",
-    "PATCH",
-    "PUT",
-    "DELETE",
-    "OPTIONS",],
+    origin: "https://clean-track-frontend.vercel.app/",
     credentials: true, 
 }));
 app.use(bodyParser.json());
