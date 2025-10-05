@@ -197,7 +197,7 @@ const transporter = nodemailer.createTransport({
             toilet.timestamp = Date.now();
 
             // Send email asynchronously (don’t block response)
-            transporter.sendMail({
+          await  transporter.sendMail({
                 from: process.env.EMAIL,
                 to: toilet.cleanerEmail,
                 subject: "Toilet Cleaning Required",
