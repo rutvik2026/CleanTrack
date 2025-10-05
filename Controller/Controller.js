@@ -183,7 +183,7 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-export const toiletStatus = async (req, res) => {
+ const toiletStatus = async (req, res) => {
     try {
         const { toiletId, gasValue } = req.body;
 
