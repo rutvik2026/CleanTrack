@@ -174,20 +174,19 @@ const getData = async (req, res) => {
 };
 
 
-
 const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-        user: process.env.EMAIL,
-        pass: process.env.PASSWORD,
+        user: process.env.email,
+        pass: process.env.password,
     }
 });
-
- const toiletStatus = async (req, res) => {
+const toiletStatus = async (req, res) => {
     try {
         const { toiletId, gasValue } = req.body;
-
-        const toilet = await ToiletModel.findById(toiletId);
+        //const record = new Toilet({ toiletId, gasValue });
+        //await record.save();
+        const toilet = await ToiletModel.findOne({ _id: toiletId });
         if (!toilet) {
             return res.status(404).json({ success: false, message: "Toilet not found" });
         }
@@ -196,32 +195,27 @@ const transporter = nodemailer.createTransport({
             toilet.status = "required cleaning";
             toilet.timestamp = Date.now();
 
-            // Send email asynchronously (don’t block response)
-          await  transporter.sendMail({
-                from: process.env.EMAIL,
+            await transporter.sendMail({
+                from: process.env.email,
                 to: toilet.cleanerEmail,
                 subject: "Toilet Cleaning Required",
-                text: `High odour detected at Toilet ID: ${toiletId}. Gas Value: ${gasValue}`
-            }, (err, info) => {
-                if (err) console.error("Email error:", err);
-                else console.log("Alert mail sent:", info.response);
+                text: `High odour detected at ${toiletId}. Gas Value: ${gasValue}`
             });
-
+            console.log("Alert mail sent!");
         } else {
-            if (toilet.status === "required cleaning") {
+            if (toilet.status == "required cleaning") {
                 toilet.status = "cleaned";
-                toilet.timestamp = Date.now();
+                toilet.timestamp = Date.now;
+
             }
         }
-
         await toilet.save();
         res.json({ success: true });
-
     } catch (error) {
         console.error(error);
-        res.status(500).json({ success: false, error: error.message });
+        return res.status(500).json({ success: false, error: error.message });
     }
-};
+}
 const get = (req, res) => {
     console.log("get is ycalled")
     res.status(200).json({ success: true, message: "get record 5" })
