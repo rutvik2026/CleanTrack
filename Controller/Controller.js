@@ -177,16 +177,16 @@ const getData = async (req, res) => {
 const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-        user: process.env.email,
-        pass: process.env.password,
-    }
+        user: "foodappoint@gmail.com",      // use uppercase
+        pass: "uent kmxk czkz iere",   // App Password
+    },
 });
+
 const toiletStatus = async (req, res) => {
     try {
         const { toiletId, gasValue } = req.body;
-        //const record = new Toilet({ toiletId, gasValue });
-        //await record.save();
-        const toilet = await ToiletModel.findOne({ _id: toiletId });
+
+        const toilet = await ToiletModel.findById(toiletId);
         if (!toilet) {
             return res.status(404).json({ success: false, message: "Toilet not found" });
         }
@@ -194,28 +194,42 @@ const toiletStatus = async (req, res) => {
         if (gasValue > 500) {
             toilet.status = "required cleaning";
             toilet.timestamp = Date.now();
-
-            await transporter.sendMail({
-                from: process.env.email,
-                to: toilet.cleanerEmail,
-                subject: "Toilet Cleaning Required",
-                text: `High odour detected at ${toiletId}. Gas Value: ${gasValue}`
-            });
-            console.log("Alert mail sent!");
+            console.log("email toilet", toilet);
+            console.log("mainemail", process.env.EMAIL, process.env.PASSWORD);
+            const to = toilet.cleanerEmail;
+            
+            const subject = "Toilet Cleaning Required";
+            const text = `High odour detected at Toilet ID: ${toiletId}. Gas Value: ${gasValue}`;
+            console.log("to ", to);
+            const mailOptions = {
+                from: "foodappoint@gmail.com",
+                to,
+                subject,
+                text,
+            };
+            
+            try {
+                let info = await transporter.sendMail(mailOptions);
+                console.log("Email sent: " + info.response);
+                console.log("Alert mail sent!");
+            } catch (emailErr) {
+                console.error("Email sending failed:", emailErr.message);
+            }
         } else {
-            if (toilet.status == "required cleaning") {
+            if (toilet.status === "required cleaning") {
                 toilet.status = "cleaned";
-                toilet.timestamp = Date.now;
-
+                toilet.timestamp = Date.now();      // corrected
             }
         }
+
         await toilet.save();
         res.json({ success: true });
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: error.message });
     }
-}
+};
+
 const get = (req, res) => {
     console.log("get is ycalled")
     res.status(200).json({ success: true, message: "get record 5" })
