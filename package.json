@@ -19,7 +19,8 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.18.1",
     "nodemailer": "^7.0.6",
-    "resend": "^6.1.2"
+    "resend": "^6.1.2",
+    "@getbrevo/brevo": "^3.0.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
