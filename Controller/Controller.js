@@ -175,59 +175,60 @@ const getData = async (req, res) => {
 
 
 const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-        user: "foodappoint@gmail.com",      // use uppercase
-        pass: "uent kmxk czkz iere",   // App Password
-    },
+  service: "gmail",
+  auth: {
+    user: "foodappoint@gmail.com",
+    pass: "uent kmxk czkz iere", // App Password
+  },
 });
 
+// Background function to send email
+const sendEmailInBackground = async (to, subject, text) => {
+  try {
+    let info = await transporter.sendMail({ from: "foodappoint@gmail.com", to, subject, text });
+    console.log("Email sent:", info.response);
+  } catch (err) {
+    console.error("Email sending failed:", err.message);
+  }
+};
+
 const toiletStatus = async (req, res) => {
-    try {
-        const { toiletId, gasValue } = req.body;
-        console.log("toilet id and gas valur",req.body);
-        const toilet = await ToiletModel.findById(toiletId);
-        if (!toilet) {
-            return res.status(404).json({ success: false, message: "Toilet not found 100" });
-        }
+  try {
+    const { toiletId, gasValue } = req.body;
+    console.log("toilet id and gas value", req.body);
 
-        if (gasValue > 500) {
-            toilet.status = "required cleaning";
-            toilet.timestamp = Date.now();
-            console.log("email toilet", toilet);
-            console.log("mainemail", process.env.EMAIL, process.env.PASSWORD);
-            const to = toilet.cleanerEmail;
-            
-            const subject = "Toilet Cleaning Required";
-            const text = `High odour detected at Toilet ID: ${toiletId}. Gas Value: ${gasValue}`;
-            console.log("to ", to);
-            const mailOptions = {
-                from: "foodappoint@gmail.com",
-                to,
-                subject,
-                text,
-            };
-            
-            try {
-                let info = await transporter.sendMail(mailOptions);
-                console.log("Email sent: " + info.response);
-                console.log("Alert mail sent!");
-            } catch (emailErr) {
-                console.error("Email sending failed:", emailErr.message);
-            }
-        } else {
-            if (toilet.status === "required cleaning") {
-                toilet.status = "cleaned";
-                toilet.timestamp = Date.now();      // corrected
-            }
-        }
-
-        await toilet.save();
-        res.json({ success: true });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, error: error.message });
+    const toilet = await ToiletModel.findById(toiletId);
+    if (!toilet) {
+      return res.status(404).json({ success: false, message: "Toilet not found" });
     }
+
+    // Immediately update status
+    if (gasValue > 500) {
+      toilet.status = "required cleaning";
+      toilet.timestamp = Date.now();
+      const to = toilet.cleanerEmail;
+      const subject = "Toilet Cleaning Required";
+      const text = `High odour detected at Toilet ID: ${toiletId}. Gas Value: ${gasValue}`;
+
+      console.log("Scheduling email to:", to);
+
+      // **Send email asynchronously**
+      process.nextTick(() => sendEmailInBackground(to, subject, text));
+
+    } else if (toilet.status === "required cleaning") {
+      toilet.status = "cleaned";
+      toilet.timestamp = Date.now();
+    }
+
+    await toilet.save();
+
+    // Respond immediately to client
+    res.json({ success: true, message: "Toilet status updated" });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: error.message });
+  }
 };
 
 const get = (req, res) => {
