@@ -188,7 +188,7 @@ const toiletStatus = async (req, res) => {
 
         const toilet = await ToiletModel.findById(toiletId);
         if (!toilet) {
-            return res.status(404).json({ success: false, message: "Toilet not found" });
+            return res.status(404).json({ success: false, message: "Toilet not found 100" });
         }
 
         if (gasValue > 500) {
