@@ -17,10 +17,13 @@ dotenv.config();
 })();
 
 const app = express();
+import cors from "cors";
 app.use(cors({
-    origin: "https://clean-track-frontend.vercel.app",
-    credentials: true, 
+  origin: "*",           // Allow all origins
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 }));
+
 app.use(bodyParser.json());
 app.post("/api/register",registerController);
 app.post("/api/login",loginController);
