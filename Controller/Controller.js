@@ -179,7 +179,7 @@ const getData = async (req, res) => {
 const apiInstance = new brevo.TransactionalEmailsApi();
 apiInstance.setApiKey(
   brevo.TransactionalEmailsApiApiKeys.apiKey,
-  "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" // your API key
+  "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" // your API key
 );
 
 const toiletStatus = async (req, res) => {
