@@ -1,4 +1,5 @@
 const express = require('express');
+import { Resend } from "resend";
 const { CleanerModel, AdminModel, ToiletModel } = require("../Models/ToiletModel.js");
 //const AdminModel = require("./Models/ToiletModel.js");
 //const ToiletModel= require("./Models/ToiletModel.js");
