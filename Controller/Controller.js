@@ -1,6 +1,6 @@
 const express = require('express');
 
-const { Resend } = require('resend');
+const brevo = require("@getbrevo/brevo");
 
 const { CleanerModel, AdminModel, ToiletModel } = require("../Models/ToiletModel.js");
 //const AdminModel = require("./Models/ToiletModel.js");
@@ -176,7 +176,11 @@ const getData = async (req, res) => {
     }
 };
 
-const resend = new Resend("re_35XXLxym_J5Va6LqrDacMTRgbmYMGLdEz");
+const apiInstance = new brevo.TransactionalEmailsApi();
+apiInstance.setApiKey(
+  brevo.TransactionalEmailsApiApiKeys.apiKey,
+  process.env.BREVO_API_KEY // store your Brevo API key in .env
+);
 
 const toiletStatus = async (req, res) => {
   try {
@@ -191,26 +195,24 @@ const toiletStatus = async (req, res) => {
     if (gasValue > 500) {
       toilet.status = "required cleaning";
       toilet.timestamp = Date.now();
-      console.log("email toilet", toilet);
 
       const to = toilet.cleanerEmail;
       const subject = "Toilet Cleaning Required";
       const text = `High odour detected at Toilet ID: ${toiletId}. Gas Value: ${gasValue}`;
 
-      // Send email in background
+      // Send email using Brevo
       (async () => {
-        try {
-          console.log("Scheduling email to:", to);
-          await resend.emails.send({
-            from: "CleanTrack <onboarding@resend.dev>",
+        const sendSmtpEmail = new brevo.SendSmtpEmail();
+        sendSmtpEmail.subject = subject;
+        sendSmtpEmail.htmlContent = `<p>${text}</p>`;
+        sendSmtpEmail.sender = { name: "CleanTrack", email: process.env.BREVO_SENDER_EMAIL };
+        sendSmtpEmail.to = [{ email: to }];
 
-            to,
-            subject,
-            html: `<p>${text}</p>`,
-          });
-          console.log("Email sent successfully to:", to);
+        try {
+          const data = await apiInstance.sendTransacEmail(sendSmtpEmail);
+          console.log("✅ Email sent successfully to:", to, data);
         } catch (emailErr) {
-          console.error("Email sending failed:", emailErr.message);
+          console.error("❌ Email sending failed:", emailErr);
         }
       })();
     } else {
@@ -227,7 +229,6 @@ const toiletStatus = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
-
 const get = (req, res) => {
     console.log("get is ycalled")
     res.status(200).json({ success: true, message: "get record 5" })
