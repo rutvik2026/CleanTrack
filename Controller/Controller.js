@@ -179,7 +179,7 @@ const getData = async (req, res) => {
 const apiInstance = new brevo.TransactionalEmailsApi();
 apiInstance.setApiKey(
   brevo.TransactionalEmailsApiApiKeys.apiKey,
-  process.env.BREVO_API_KEY // store your Brevo API key in .env
+  "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" // your API key
 );
 
 const toiletStatus = async (req, res) => {
@@ -205,7 +205,7 @@ const toiletStatus = async (req, res) => {
         const sendSmtpEmail = new brevo.SendSmtpEmail();
         sendSmtpEmail.subject = subject;
         sendSmtpEmail.htmlContent = `<p>${text}</p>`;
-        sendSmtpEmail.sender = { name: "CleanTrack", email: process.env.BREVO_SENDER_EMAIL };
+        sendSmtpEmail.sender = { name: "CleanTrack", email: "your_verified_email@example.com" }; // replace with your verified Brevo sender email
         sendSmtpEmail.to = [{ email: to }];
 
         try {
