@@ -202,7 +202,7 @@ const toiletStatus = async (req, res) => {
         try {
           console.log("Scheduling email to:", to);
           await resend.emails.send({
-            from: "foodappoint@gmail.com",
+            from: "CleanTrack <alert@cleantrack.com>",
             to,
             subject,
             html: `<p>${text}</p>`,
