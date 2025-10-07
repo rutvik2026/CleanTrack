@@ -1,6 +1,6 @@
 const express = require('express');
 
-const Resendr = require('resend');
+const Resend = require('resend');
 const { CleanerModel, AdminModel, ToiletModel } = require("../Models/ToiletModel.js");
 //const AdminModel = require("./Models/ToiletModel.js");
 //const ToiletModel= require("./Models/ToiletModel.js");
