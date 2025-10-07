@@ -205,7 +205,7 @@ const toiletStatus = async (req, res) => {
         const sendSmtpEmail = new brevo.SendSmtpEmail();
         sendSmtpEmail.subject = subject;
         sendSmtpEmail.htmlContent = `<p>${text}</p>`;
-        sendSmtpEmail.sender = { name: "CleanTrack", email: "your_verified_email@example.com" }; // replace with your verified Brevo sender email
+        sendSmtpEmail.sender = { name: "CleanTrack", email: "foodappoint@gmail.com" }; // replace with your verified Brevo sender email
         sendSmtpEmail.to = [{ email: to }];
 
         try {
