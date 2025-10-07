@@ -173,24 +173,7 @@ const getData = async (req, res) => {
     }
 };
 
-
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: "foodappoint@gmail.com",
-    pass: "uent kmxk czkz iere", // App Password
-  },
-});
-
-// Background function to send email
-const sendEmailInBackground = async (to, subject, text) => {
-  try {
-    let info = await transporter.sendMail({ from: "foodappoint@gmail.com", to, subject, text });
-    console.log("Email sent:", info.response);
-  } catch (err) {
-    console.error("Email sending failed:", err.message);
-  }
-};
+const resend = new Resend("re_35XXLxym_J5Va6LqrDacMTRgbmYMGLdEz");
 
 const toiletStatus = async (req, res) => {
   try {
@@ -202,29 +185,39 @@ const toiletStatus = async (req, res) => {
       return res.status(404).json({ success: false, message: "Toilet not found" });
     }
 
-    // Immediately update status
     if (gasValue > 500) {
       toilet.status = "required cleaning";
       toilet.timestamp = Date.now();
+      console.log("email toilet", toilet);
+
       const to = toilet.cleanerEmail;
       const subject = "Toilet Cleaning Required";
       const text = `High odour detected at Toilet ID: ${toiletId}. Gas Value: ${gasValue}`;
 
-      console.log("Scheduling email to:", to);
-
-      // **Send email asynchronously**
-      process.nextTick(() => sendEmailInBackground(to, subject, text));
-
-    } else if (toilet.status === "required cleaning") {
-      toilet.status = "cleaned";
-      toilet.timestamp = Date.now();
+      // Send email in background
+      (async () => {
+        try {
+          console.log("Scheduling email to:", to);
+          await resend.emails.send({
+            from: "CleanTrack <noreply@cleantrack.com>",
+            to,
+            subject,
+            html: `<p>${text}</p>`,
+          });
+          console.log("Email sent successfully to:", to);
+        } catch (emailErr) {
+          console.error("Email sending failed:", emailErr.message);
+        }
+      })();
+    } else {
+      if (toilet.status === "required cleaning") {
+        toilet.status = "cleaned";
+        toilet.timestamp = Date.now();
+      }
     }
 
     await toilet.save();
-
-    // Respond immediately to client
-    res.json({ success: true, message: "Toilet status updated" });
-
+    res.json({ success: true });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, error: error.message });
