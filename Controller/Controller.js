@@ -185,7 +185,7 @@ const transporter = nodemailer.createTransport({
 const toiletStatus = async (req, res) => {
     try {
         const { toiletId, gasValue } = req.body;
-
+        console.log("toilet id and gas valur",req.body);
         const toilet = await ToiletModel.findById(toiletId);
         if (!toilet) {
             return res.status(404).json({ success: false, message: "Toilet not found 100" });
