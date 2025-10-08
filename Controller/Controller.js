@@ -1,6 +1,6 @@
 const express = require('express');
 
-const sgMail = require("@sendgrid/mail");
+
 
 const { CleanerModel, AdminModel, ToiletModel } = require("../Models/ToiletModel.js");
 //const AdminModel = require("./Models/ToiletModel.js");
@@ -176,60 +176,64 @@ const getData = async (req, res) => {
     }
 };
 
-sgMail.setApiKey("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");
+
+       
+       const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+        user: "foodappoint@gmail.com",      // use uppercase
+        pass: "uent kmxk czkz iere",   // App Password
+    },
+});
 
 const toiletStatus = async (req, res) => {
-  try {
-    const { toiletID, gasValue } = req.body;
-    console.log("toilet id and gas value", req.body);
+    try {
+        const { toiletId, gasValue } = req.body;
 
-    const toilet = await ToiletModel.findById(toiletID);
-    if (!toilet) {
-      return res.status(404).json({ success: false, message: "Toilet not found" });
+        const toilet = await ToiletModel.findById(toiletId);
+        if (!toilet) {
+            return res.status(404).json({ success: false, message: "Toilet not found" });
+        }
+
+        if (gasValue > 500) {
+            toilet.status = "required cleaning";
+            toilet.timestamp = Date.now();
+            console.log("email toilet", toilet);
+            console.log("mainemail", process.env.EMAIL, process.env.PASSWORD);
+            const to = toilet.cleanerEmail;
+            
+            const subject = "Toilet Cleaning Required";
+            const text = `High odour detected at Toilet ID: ${toiletId}. Gas Value: ${gasValue}`;
+            console.log("to ", to);
+            const mailOptions = {
+                from: "foodappoint@gmail.com",
+                to,
+                subject,
+                text,
+            };
+            
+            try {
+                let info = await transporter.sendMail(mailOptions);
+                console.log("Email sent: " + info.response);
+                console.log("Alert mail sent!");
+            } catch (emailErr) {
+                console.error("Email sending failed:", emailErr.message);
+            }
+        } else {
+            if (toilet.status === "required cleaning") {
+                toilet.status = "cleaned";
+                toilet.timestamp = Date.now();      // corrected
+            }
+        }
+
+        await toilet.save();
+        res.json({ success: true });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, error: error.message });
     }
- console.log("gas value new",gasValue);
-    if (gasValue > 5) {
-      toilet.status = "required cleaning";
-      toilet.timestamp = Date.now();
-        console.log("gas value greter than 5",gasValue);
-      const to = toilet.cleanerEmail;
-      const subject = "Toilet Cleaning Required";
-      const text = `High odour detected at Toilet ID: ${toiletID}. Gas Value: ${gasValue}`;
-
-      const msg = {
-        to,
-        from: {
-          name: "CleanTrack",
-          email: "foodappoint@gmail.com", // verified sender
-        },
-        replyTo: "foodappoint@gmail.com", // same email is fine
-        subject,
-        html: `<p>${text}</p>`,
-      };
-
-      try {
-          console.log("gas value greter than 5 inside try",gasValue);
-        await sgMail.send(msg);
-        console.log("✅ Email sent successfully to:", to);
-      } catch (emailErr) {
-          console.log("gas value greter than 5 iunside catch",gasValue);
-        console.error("❌ Email sending failed:", emailErr);
-      }
-    } else {
-        console.log("gas value less than 5",gasValue);
-      if (toilet.status === "required cleaning") {
-        toilet.status = "cleaned";
-        toilet.timestamp = Date.now();
-      }
-    }
-
-    await toilet.save();
-    res.json({ success: true });
-  } catch (error) {
-    console.error("Server error:", error);
-    res.status(500).json({ success: false, error: error.message });
-  }
 };
+
 
 const get = (req, res) => {
     console.log("get is ycalled")
