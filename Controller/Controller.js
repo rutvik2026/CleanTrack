@@ -187,11 +187,11 @@ const toiletStatus = async (req, res) => {
     if (!toilet) {
       return res.status(404).json({ success: false, message: "Toilet not found" });
     }
-
+ console.log("gas value new",gasValue);
     if (gasValue > 5) {
       toilet.status = "required cleaning";
       toilet.timestamp = Date.now();
-
+        console.log("gas value greter than 5",gasValue);
       const to = toilet.cleanerEmail;
       const subject = "Toilet Cleaning Required";
       const text = `High odour detected at Toilet ID: ${toiletId}. Gas Value: ${gasValue}`;
@@ -208,12 +208,15 @@ const toiletStatus = async (req, res) => {
       };
 
       try {
+          console.log("gas value greter than 5 inside try",gasValue);
         await sgMail.send(msg);
         console.log("✅ Email sent successfully to:", to);
       } catch (emailErr) {
+          console.log("gas value greter than 5 iunside catch",gasValue);
         console.error("❌ Email sending failed:", emailErr);
       }
     } else {
+        console.log("gas value less than 5",gasValue);
       if (toilet.status === "required cleaning") {
         toilet.status = "cleaned";
         toilet.timestamp = Date.now();
