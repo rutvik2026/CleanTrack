@@ -1,6 +1,6 @@
 const express = require('express');
 
-const brevo = require("@getbrevo/brevo");
+const sgMail = require("@sendgrid/mail");
 
 const { CleanerModel, AdminModel, ToiletModel } = require("../Models/ToiletModel.js");
 //const AdminModel = require("./Models/ToiletModel.js");
@@ -176,11 +176,7 @@ const getData = async (req, res) => {
     }
 };
 
-const apiInstance = new brevo.TransactionalEmailsApi();
-apiInstance.setApiKey(
-  brevo.TransactionalEmailsApiApiKeys.apiKey,
-  "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" // your API key
-);
+sgMail.setApiKey("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");
 
 const toiletStatus = async (req, res) => {
   try {
@@ -200,21 +196,23 @@ const toiletStatus = async (req, res) => {
       const subject = "Toilet Cleaning Required";
       const text = `High odour detected at Toilet ID: ${toiletId}. Gas Value: ${gasValue}`;
 
-      // Send email using Brevo
-      (async () => {
-        const sendSmtpEmail = new brevo.SendSmtpEmail();
-        sendSmtpEmail.subject = subject;
-        sendSmtpEmail.htmlContent = `<p>${text}</p>`;
-        sendSmtpEmail.sender = { name: "CleanTrack", email: "foodappoint@gmail.com" }; // replace with your verified Brevo sender email
-        sendSmtpEmail.to = [{ email: to }];
+      const msg = {
+        to,
+        from: {
+          name: "CleanTrack",
+          email: "foodappoint@gmail.com", // verified sender
+        },
+        replyTo: "foodappoint@gmail.com", // same email is fine
+        subject,
+        html: `<p>${text}</p>`,
+      };
 
-        try {
-          const data = await apiInstance.sendTransacEmail(sendSmtpEmail);
-          console.log("✅ Email sent successfully to:", to, data);
-        } catch (emailErr) {
-          console.error("❌ Email sending failed:", emailErr);
-        }
-      })();
+      try {
+        await sgMail.send(msg);
+        console.log("✅ Email sent successfully to:", to);
+      } catch (emailErr) {
+        console.error("❌ Email sending failed:", emailErr);
+      }
     } else {
       if (toilet.status === "required cleaning") {
         toilet.status = "cleaned";
@@ -225,10 +223,11 @@ const toiletStatus = async (req, res) => {
     await toilet.save();
     res.json({ success: true });
   } catch (error) {
-    console.error(error);
+    console.error("Server error:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 };
+
 const get = (req, res) => {
     console.log("get is ycalled")
     res.status(200).json({ success: true, message: "get record 5" })
