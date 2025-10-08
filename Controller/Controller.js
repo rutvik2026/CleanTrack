@@ -176,7 +176,8 @@ const getData = async (req, res) => {
     }
 };
 
-sgMail.setApiKey("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");
+sgMail.setApiKey("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
+");
 
 const toiletStatus = async (req, res) => {
   try {
