@@ -180,10 +180,10 @@ sgMail.setApiKey("SG.FVQzbN1ATA6JqmE0OIBA7w.kX5WtNrF5TUlCItKWpQ57gchSKRbFiEe8fbr
 
 const toiletStatus = async (req, res) => {
   try {
-    const { toiletId, gasValue } = req.body;
+    const { toiletID, gasValue } = req.body;
     console.log("toilet id and gas value", req.body);
 
-    const toilet = await ToiletModel.findById(toiletId);
+    const toilet = await ToiletModel.findById(toiletID);
     if (!toilet) {
       return res.status(404).json({ success: false, message: "Toilet not found" });
     }
@@ -194,7 +194,7 @@ const toiletStatus = async (req, res) => {
         console.log("gas value greter than 5",gasValue);
       const to = toilet.cleanerEmail;
       const subject = "Toilet Cleaning Required";
-      const text = `High odour detected at Toilet ID: ${toiletId}. Gas Value: ${gasValue}`;
+      const text = `High odour detected at Toilet ID: ${toiletID}. Gas Value: ${gasValue}`;
 
       const msg = {
         to,
