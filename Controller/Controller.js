@@ -188,7 +188,7 @@ const toiletStatus = async (req, res) => {
       return res.status(404).json({ success: false, message: "Toilet not found" });
     }
 
-    if (gasValue > 500) {
+    if (gasValue > 5) {
       toilet.status = "required cleaning";
       toilet.timestamp = Date.now();
 
