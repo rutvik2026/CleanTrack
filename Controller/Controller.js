@@ -188,22 +188,22 @@ const getData = async (req, res) => {
 
 const toiletStatus = async (req, res) => {
     try {
-        const { toiletId, gasValue } = req.body;
-
-        const toilet = await ToiletModel.findById(toiletId);
+        const { toiletID, gasValue } = req.body;
+            console.log("inside status",req.body);
+        const toilet = await ToiletModel.findById(toiletID);
         if (!toilet) {
             return res.status(404).json({ success: false, message: "Toilet not found" });
         }
 
         if (gasValue > 500) {
+             console.log("gasValue  is greter than 500",gasValue );
             toilet.status = "required cleaning";
             toilet.timestamp = Date.now();
-            console.log("email toilet", toilet);
-            console.log("mainemail", process.env.EMAIL, process.env.PASSWORD);
+            
             const to = toilet.cleanerEmail;
             
             const subject = "Toilet Cleaning Required";
-            const text = `High odour detected at Toilet ID: ${toiletId}. Gas Value: ${gasValue}`;
+            const text = `High odour detected at Toilet ID: ${toiletID}. Gas Value: ${gasValue}`;
             console.log("to ", to);
             const mailOptions = {
                 from: "foodappoint@gmail.com",
