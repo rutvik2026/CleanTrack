@@ -227,7 +227,7 @@ const toiletStatus = async (req, res) => {
         }
 
         await toilet.save();
-        res.json({ success: true });
+        res.json({ success: true , message: "The email is sent to"});
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, error: error.message });
